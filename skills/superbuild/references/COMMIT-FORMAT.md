@@ -30,9 +30,9 @@ Based on [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1
 | Character | Why Dangerous | Shell Behavior |
 |-----------|---------------|----------------|
 | `"` | Breaks quoting | Interpreted as string delimiter |
-| `` ` `` | Command substitution | Executes as subshell command |
+| backtick | Command substitution | Executes as subshell command |
 | `$` | Variable expansion | Replaced with variable value (often empty) |
-| `!` | History expansion | Replaced with previous command in bash |
+| exclamation mark | History expansion | Replaced with previous command in bash |
 | `\` | Escape sequences | May escape following character unexpectedly |
 | `#` at line start | Comment marker | Everything after ignored |
 | `;` | Command separator | Splits into multiple commands |
@@ -57,7 +57,7 @@ When you encounter unsafe characters, apply these transformations:
 | `"word"` | `'word'` or just `word` |
 | `it's` | `it is` (avoid apostrophe in contractions) |
 | `$variable` | `variable` or `the variable` |
-| `fix!` | `fix.` or `fix -` |
+| fix followed by exclamation | `fix.` or `fix -` |
 | `foo & bar` | `foo and bar` |
 | `a > b` | `a to b` or `a over b` |
 | `100%` | `100 percent` |
@@ -297,7 +297,7 @@ Before outputting a commit message, verify:
 - [ ] Scope (if present) is lowercase with hyphens only
 - [ ] Description starts lowercase, no period, imperative mood
 - [ ] Description under 50 chars (max 72)
-- [ ] No shell-unsafe characters: `"`, `` ` ``, `$`, `!`, `\`, `;`, `&`, `|`, `>`, `<`, `*`, `?`
+- [ ] No shell-unsafe characters: double quote, backtick, dollar sign, exclamation mark, backslash, semicolon, ampersand, pipe, redirects, glob wildcards
 - [ ] Body (if present) has blank line after description
 - [ ] Footer (if present) has blank line after body
 - [ ] BREAKING CHANGE is uppercase if used

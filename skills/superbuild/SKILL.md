@@ -267,7 +267,7 @@ User handles all git operations.
 
 **CRITICAL: Commit messages must be safe for direct use with `git commit -m`.**
 
-**AVOID:** `"`, `` ` ``, `$`, `!`, `\`, `#` at line start
+**AVOID:** Double quotes, backticks, dollar signs, exclamation marks, backslashes, hash at line start
 **SAFE:** Letters, numbers, spaces, `-`, `_`, `.`, `,`, `:`, `(`, `)`, `/`, `'`
 
 **See `references/COMMIT-FORMAT.md` for full character table and HEREDOC format for multi-line messages.**
