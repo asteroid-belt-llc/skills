@@ -1,208 +1,346 @@
-# Verification Examples by Content Type
+# Verification Examples: The Mastery Ladder
 
-Detailed examples of verification questions for different types of technical content.
+This reference shows how to construct mastery ladders for different content types, climbing through Bloom's cognitive levels.
 
 ---
 
-## Conceptual Content (Theory, Mental Models)
+## The Mastery Ladder Principle
 
-**Verification method:** Explain-back
+Each chunk requires **3-5 questions** that climb cognitive levels:
 
-**Goal:** Confirm learner can articulate the concept in their own words, not just recognize it.
+```
+Bloom's Levels (ascending difficulty):
+1. Remember  → Recall facts
+2. Understand → Explain in own words
+3. Apply     → Use in new situations
+4. Analyze   → Break down, compare, contrast
+5. Evaluate  → Judge, critique, defend
+6. Create    → Design new solutions
+```
 
-### Examples
+**Minimum ladder:** Understand → Apply → Analyze
+**Full ladder:** Understand → Apply → Analyze → Evaluate
+
+Never verify with only Remember-level questions—that tests recognition, not understanding.
+
+---
+
+## Example Ladders by Content Type
+
+### Conceptual Content (Theory, Mental Models)
 
 **Topic:** Why RAG systems use retrieval + generation
 
-> "In your own words, why can't we just use a larger context window instead of retrieval?"
+```
+Q1 (Understand): "In your own words, why can't we just give an LLM
+    a million documents in its context window?"
 
-**Good answer signals:**
-- Mentions cost/latency of large contexts
-- Notes retrieval can access unlimited knowledge
-- Understands context windows have limits
+PASSING SIGNALS:
+- Mentions context window limits
+- Notes cost/latency of large contexts
+- Understands that retrieval is selective
 
-**Topic:** CAP theorem trade-offs
+Q2 (Apply): "A user asks about a company policy document from last
+    month. Your LLM's training data is 6 months old. How would a
+    RAG system handle this?"
 
-> "Explain to me like I'm a colleague: why can't a distributed database have all three of consistency, availability, and partition tolerance?"
+PASSING SIGNALS:
+- Retrieve the policy document first
+- Include retrieved content in prompt
+- LLM generates answer using fresh data
 
-**Good answer signals:**
-- Can give concrete scenario (network split)
-- Explains the forced choice
-- Doesn't just recite the theorem
+Q3 (Analyze): "Compare RAG with fine-tuning. When would you choose
+    each approach?"
 
-**Topic:** Eventual consistency
+PASSING SIGNALS:
+- RAG: When data changes frequently, when you need citations
+- Fine-tuning: When you want behavioral changes, style adaptation
+- Understands trade-offs of each
 
-> "A junior developer asks why their read returned stale data. How would you explain what happened?"
+Q4 (Evaluate): "A colleague says: 'Just use a bigger context window
+    instead of building RAG—it's simpler.' What's your response?"
+
+PASSING SIGNALS:
+- Acknowledges the simplicity argument
+- Counters with: cost, latency, retrieval precision, update flexibility
+- Makes nuanced recommendation based on use case
+```
+
+**THRESHOLD:** 3/4 with solid reasoning
 
 ---
 
-## Procedural Content (How-to, Workflows)
-
-**Verification method:** Applied exercise
-
-**Goal:** Confirm learner can apply the steps to a new situation.
-
-### Examples
+### Procedural Content (How-to, Workflows)
 
 **Topic:** Setting up a Python project with uv
 
-> "You're starting a new CLI tool project. Walk me through the first 5 commands you'd run."
+```
+Q1 (Understand): "What's the difference between `uv init` and
+    `uv init --package`? When would you use each?"
 
-**Good answer signals:**
-- `uv init --package`
-- Creates src/ layout
-- Adds dependencies
-- Runs `uv sync`
-- Knows to check with `uv run pytest`
+PASSING SIGNALS:
+- Knows --package creates src/ layout
+- Understands package vs script distinction
+- Can articulate when each matters
 
-**Topic:** Git rebase workflow
+Q2 (Apply): "You're starting a new CLI tool project called 'myapp'.
+    Walk me through the first 5 commands you'd run."
 
-> "Your feature branch is 10 commits behind main and has 3 commits of your own. Describe how you'd update it."
+PASSING SIGNALS:
+- `uv init --package myapp`
+- `cd myapp`
+- `uv add typer rich` (or similar deps)
+- `uv sync`
+- `uv run pytest` (or manual verification)
 
-**Topic:** Debugging a failing test
+Q3 (Apply): "A test requires a dev-only dependency (pytest-cov).
+    How do you add it without including in production deps?"
 
-> "A test passes locally but fails in CI. What's your systematic approach to diagnose this?"
+PASSING SIGNALS:
+- `uv add --dev pytest-cov`
+- Knows about dependency groups
+- Understands prod vs dev separation
+
+Q4 (Analyze): "Your CI pipeline runs `pip install .` but your local
+    dev uses `uv sync`. What problems might this cause?"
+
+PASSING SIGNALS:
+- Dependency version differences
+- Lock file not used by pip
+- Potential for "works on my machine" bugs
+- Solution: use uv in CI too, or ensure pyproject.toml is precise
+```
+
+**THRESHOLD:** 3/4 with correct commands and reasoning
 
 ---
 
-## Factual Content (Definitions, Specs, Numbers)
-
-**Verification method:** Quick quiz (multiple choice or fill-in)
-
-**Goal:** Confirm accurate recall of specific facts.
-
-### Examples
+### Factual Content (Definitions, Specs)
 
 **Topic:** Embedding model dimensions
 
-> "What's the embedding dimension of all-MiniLM-L6-v2?
-> (a) 128  (b) 384  (c) 768  (d) 1536"
+```
+Q1 (Remember): "What's the embedding dimension of all-MiniLM-L6-v2?"
+    (a) 128  (b) 384  (c) 768  (d) 1536
 
-**Topic:** SQLite FTS5 tokenizers
+ANSWER: (b) 384
 
-> "Which tokenizer would you use if you want 'running' to match 'run'?
-> (a) unicode61  (b) porter  (c) trigram  (d) ascii"
+Q2 (Understand): "If embeddings from model A are 384-dimensional and
+    model B are 1536-dimensional, can you directly compare them?
+    Why or why not?"
 
-**Topic:** HTTP status codes
+PASSING SIGNALS:
+- No, different spaces
+- The numbers mean different things
+- Would need same model or mapping between them
 
-> "A client sends malformed JSON. What status code should your API return?
-> (a) 400  (b) 404  (c) 500  (d) 422"
+Q3 (Apply): "You have 500,000 documents to embed. Calculate the
+    storage for 384-dim vs 1536-dim embeddings. (Assume float32)"
 
-**Topic:** Fill-in-the-blank
+PASSING SIGNALS:
+- 384: 500K × 384 × 4 bytes = 768MB
+- 1536: 500K × 1536 × 4 bytes = 3GB
+- 4x storage difference
 
-> "LanceDB stores vectors in a columnar format called ______ for efficient similarity search."
+Q4 (Analyze): "Given the storage difference, when would the larger
+    model be worth it?"
 
----
+PASSING SIGNALS:
+- When semantic precision is critical
+- When query complexity is high
+- When you've benchmarked and smaller model fails
+- NOT when: standard search, cost-sensitive, speed-critical
+```
 
-## Architectural Content (Systems, Trade-offs)
-
-**Verification method:** Design question
-
-**Goal:** Confirm learner can reason about trade-offs and make justified decisions.
-
-### Examples
-
-**Topic:** Choosing storage strategy
-
-> "Your knowledge base grows from 1,000 to 1,000,000 documents. What changes would you make to the current SQLite + LanceDB architecture?"
-
-**Good answer signals:**
-- Considers sharding or distributed storage
-- Thinks about indexing time
-- Mentions potential move to dedicated vector DB
-- Weighs operational complexity
-
-**Topic:** Caching decisions
-
-> "Users complain search is slow. Where would you add caching, and what are the trade-offs of each option?"
-
-**Topic:** API design
-
-> "Should the search endpoint return full document content or just IDs? Argue both sides, then pick one."
-
-**Topic:** Failure modes
-
-> "The embedding service is down. How should the system behave? What are your options?"
+**THRESHOLD:** 3/4 with calculations correct
 
 ---
 
-## Code-Heavy Content
+### Architectural Content (Systems, Trade-offs)
 
-**Verification method:** Code task
+**Topic:** Choosing between monolith and microservices
 
-**Goal:** Confirm learner can write working code using the pattern.
+```
+Q1 (Understand): "Explain the fundamental difference in how a
+    monolith and microservices handle a change to the user auth
+    system."
 
-### Examples
+PASSING SIGNALS:
+- Monolith: Change in one codebase, single deployment
+- Microservices: Change auth service, deploy independently
+- Understands coupling implications
+
+Q2 (Apply): "A startup has 3 developers and wants to launch in 2
+    months. They're debating architecture. Which do you recommend
+    and why?"
+
+PASSING SIGNALS:
+- Monolith for speed and simplicity
+- Small team can't support microservices overhead
+- Can extract services later if needed
+- Ship fast, refactor when necessary
+
+Q3 (Analyze): "Your monolith is struggling with the checkout flow
+    during peak traffic while other pages are fine. What are your
+    options and trade-offs?"
+
+PASSING SIGNALS:
+- Scale the whole thing (wasteful but simple)
+- Extract checkout as a service (targeted but complex)
+- Optimize the hot path (might not be enough)
+- Add caching/queue (can help but limited)
+
+Q4 (Evaluate): "A VP says: 'Netflix uses microservices, so should
+    we.' Construct your counter-argument."
+
+PASSING SIGNALS:
+- Netflix scale ≠ our scale
+- Netflix has thousands of engineers
+- Our team can't maintain dozens of services
+- Architecture should match organization (Conway's Law)
+- What problem are we solving?
+
+Q5 (Create): "Design a migration path: you have a successful
+    monolith that's hitting scaling limits. How would you gradually
+    extract services?"
+
+PASSING SIGNALS:
+- Strangler fig pattern
+- Start with highest-pain/most-independent
+- Add API gateway for routing
+- Keep monolith running during transition
+- Move data ownership gradually
+```
+
+**THRESHOLD:** 4/5 with nuanced reasoning
+
+---
+
+### Code-Heavy Content
 
 **Topic:** Pydantic model validation
 
-> "Write a Pydantic model for a BlogPost with: title (required, 5-100 chars), content (required), tags (optional list), published_at (optional datetime)."
+```
+Q1 (Understand): "What happens when you create a Pydantic model
+    with a field that doesn't match the type annotation?"
 
-**Topic:** SQLite context manager
+PASSING SIGNALS:
+- ValidationError raised
+- Pydantic attempts coercion first (e.g., "123" → 123)
+- Strict mode can disable coercion
 
-> "Write a context manager that handles SQLite connections with proper cleanup on exceptions."
+Q2 (Apply): "Write a Pydantic model for a BlogPost with:
+    - title (required, 5-100 chars)
+    - content (required)
+    - tags (optional list of strings)
+    - published_at (optional datetime)"
 
-**Topic:** Async patterns
+PASSING CODE:
+```python
+from pydantic import BaseModel, Field
+from typing import Optional
+from datetime import datetime
 
-> "Convert this synchronous function to async, handling the case where the API call might timeout."
+class BlogPost(BaseModel):
+    title: str = Field(..., min_length=5, max_length=100)
+    content: str
+    tags: Optional[list[str]] = None
+    published_at: Optional[datetime] = None
+```
 
-**Topic:** Testing patterns
+Q3 (Analyze): "Compare Field validation vs @validator decorator.
+    When would you use each?"
 
-> "Write a pytest fixture that creates a temporary SQLite database with the schema we discussed."
+PASSING SIGNALS:
+- Field: Simple constraints (min/max, regex)
+- @validator: Complex logic, cross-field validation
+- Field is declarative, @validator is imperative
+- Use Field when possible, @validator when necessary
+
+Q4 (Evaluate): "A teammate puts all validation in @validator
+    methods instead of using Field constraints. Is this a problem?"
+
+PASSING SIGNALS:
+- Harder to see constraints at a glance
+- More verbose than necessary
+- Field constraints are optimized by Pydantic
+- But: sometimes complex logic requires validators
+- Recommendation: Field for simple, validator for complex
+
+Q5 (Create): "Design a Pydantic model for an API request that
+    creates a user with password confirmation (password must match
+    password_confirm)."
+
+PASSING CODE:
+```python
+from pydantic import BaseModel, model_validator
+
+class CreateUser(BaseModel):
+    email: str
+    password: str
+    password_confirm: str
+
+    @model_validator(mode='after')
+    def passwords_match(self):
+        if self.password != self.password_confirm:
+            raise ValueError('Passwords do not match')
+        return self
+```
+
+**THRESHOLD:** 4/5 with working code
 
 ---
 
-## Combination Scenarios
+## Mastery Signals vs Warning Signs
 
-Some content needs multiple verification types.
+### Signals of Understanding
 
-### Example: Teaching a complete feature
+| Signal | Meaning |
+|--------|---------|
+| Explains in own words | Not just parroting |
+| Offers concrete example | Can instantiate abstract |
+| Identifies edge cases | Deep comprehension |
+| Asks clarifying questions | Engaged thinking |
+| Makes connections to prior chunks | Building knowledge graph |
+| Correctly applies to novel scenario | Transfer achieved |
+| Critiques with nuance | Evaluation-level thinking |
 
-**Content:** Implementing FTS5 search in the codebase
+### Warning Signs (Need More Work)
 
-**Verification sequence:**
-
-1. **Factual:** "What's the SQL to create an FTS5 virtual table with porter stemming?"
-
-2. **Conceptual:** "Why do we use `content='triggers'` instead of storing text directly in the FTS table?"
-
-3. **Code task:** "Write the Python function that searches triggers and returns (unit_id, score) tuples."
-
-4. **Architectural:** "A user searches for 'authentication' but wants results about 'auth', 'login', and 'signin' too. How would you improve the search?"
-
----
-
-## Signs Verification Is Working
-
-**Learner understands:**
-- Answers correctly on first try
-- Can explain reasoning, not just give answer
-- Asks clarifying questions that show engagement
-- Makes connections to previous chunks
-
-**Learner needs more help:**
-- Wrong answer
-- Right answer but can't explain why
-- Hesitant, qualified answers ("I think maybe...")
-- Asking to see the content again
-
-**Learner is confused (pivot to foundations):**
-- Repeatedly wrong despite rephrasing
-- Answers unrelated to question
-- "I have no idea"
-- Frustration signals
+| Warning | Meaning |
+|---------|---------|
+| Repeats definition verbatim | Recognition, not understanding |
+| Right answer, can't explain why | Guessed or memorized |
+| "I think maybe..." | Not confident, incomplete model |
+| Fails when question is rephrased | Shallow pattern matching |
+| Can't apply to new context | No transfer |
+| Gives incomplete trade-off analysis | Missing depth |
+| Asks to see material again | Didn't encode first time |
 
 ---
 
-## Verification Anti-Patterns
+## Question Design Anti-Patterns
 
-**Avoid these:**
+**Avoid These:**
 
-| Anti-Pattern | Problem | Better Approach |
-|--------------|---------|-----------------|
+| Anti-Pattern | Problem | Fix |
+|--------------|---------|-----|
 | "Does that make sense?" | Invites false "yes" | "Explain back to me..." |
-| "Any questions?" | Puts burden on confused learner | Verify actively |
-| "Got it?" | Binary, no depth check | Quiz or explain-back |
-| Asking exact same words from content | Tests recognition, not understanding | Rephrase or apply |
+| "Any questions?" | Burden on confused learner | Verify actively |
+| Asking exact words from content | Tests recognition only | Rephrase or apply |
 | Long multi-part questions | Cognitive overload | One question at a time |
-| Gotcha questions | Damages trust | Fair assessment of what was taught |
+| Gotcha/trick questions | Damages trust | Fair assessment |
+| Only Remember-level | Surface only | Climb the ladder |
+| Accept "I think so" | No verification | Require demonstration |
+
+---
+
+## Building a Mastery Ladder: Step by Step
+
+1. **Identify the core concept(s)** in the chunk
+2. **Start at Understand**: Can they explain it in their own words?
+3. **Move to Apply**: Can they use it in a scenario?
+4. **Require Analyze**: Can they compare, contrast, break down?
+5. **Add Evaluate if appropriate**: Can they critique or defend?
+6. **Score 80%+**: Must get 3/4 or 4/5 with solid reasoning
+7. **If below threshold**: Reteach with different angle, then retry
