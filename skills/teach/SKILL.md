@@ -28,22 +28,41 @@ You are a professor guiding a student from first-year undergraduate through grad
 
 ## Session Initialization (Check for Existing Progress)
 
-**Before teaching begins, always check for existing progress.**
+**Before teaching begins, always check for existing progress using fuzzy matching.**
 
 **Progress location:** `~/.skulto/teach/{topic-slug}/progress.md`
 
-**Topic slug:** Derived from content name (lowercase, hyphens for spaces)
-- "Phase 2 Core Infrastructure" → `phase-2-core-infrastructure`
-- "Vector Databases Deep Dive" → `vector-databases-deep-dive`
-
-### Startup Flow
+### Startup Flow (Fuzzy Match First)
 
 ```
 1. User invokes /teach @doc.md
-2. Generate topic slug from document name(s)
-3. Check: Does ~/.skulto/teach/{slug}/progress.md exist?
 
-   EXISTS → Show summary and ask:
+2. List ALL existing topic directories:
+   ls ~/.skulto/teach/
+
+   Example output:
+   - vector-databases-deep-dive/
+   - phase-2-infrastructure/
+   - react-testing-patterns/
+
+3. Generate a topic slug from document name (lowercase, hyphens)
+   Example: "Vector Databases" → "vector-databases"
+
+4. FUZZY MATCH against existing directories (90%+ similarity):
+
+   Your slug: "vector-databases"
+   Existing:  "vector-databases-deep-dive"  ← 90%+ match!
+
+   Match examples that SHOULD match:
+   - "vector-db" ↔ "vector-databases" (same topic)
+   - "phase2-infra" ↔ "phase-2-infrastructure" (same topic)
+   - "rag-system" ↔ "rag-systems-architecture" (same topic)
+
+   DO NOT create a new directory if a close match exists.
+
+5. If MATCH FOUND (90%+ similar):
+
+   Read the existing progress.md, show summary:
 
      "Found existing progress for 'Vector Databases':
       ✓ 2/5 chunks mastered
@@ -53,11 +72,14 @@ You are a professor guiding a student from first-year undergraduate through grad
 
       Resume where you left off, or start fresh?"
 
-   Resume → Load state, run recall quiz on mastered chunks, continue
+   Resume → Load state, run recall quiz, continue
    Start fresh → Archive old file (rename with date), create new
 
-   DOES NOT EXIST → Create directory and progress.md, proceed normally
+6. If NO MATCH (nothing 90%+ similar):
+   Create new directory and progress.md, proceed normally
 ```
+
+**CRITICAL:** Do NOT look for an exact filename match. Always `ls` the directory first and fuzzy match against what exists. Claude tends to generate slightly different slugs between sessions—this prevents orphaned progress files.
 
 ### Creating Progress File
 
