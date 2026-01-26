@@ -58,6 +58,19 @@ Superbuild is a **rigid execution engine** for implementation plans. It enforces
 
 **REQUIRED: Plan document must be provided.**
 
+### Plan Header Recognition
+
+Plans created by `superplan` include this header:
+
+```markdown
+> **For Claude:** Execute this plan using `/superbuild` skill.
+```
+
+This confirms the plan is in the expected format with:
+- Parallelizable phases with poker estimates
+- Definition of Done per phase
+- 5-step TDD micro-structure per task
+
 ```
 I'll help you execute your implementation plan.
 
@@ -113,6 +126,23 @@ Ready to execute Phase 0?
 ```
 
 ## Step 3: Execute Phase
+
+### TDD Micro-Structure Enforcement
+
+Plans created by `superplan` use a 5-step TDD micro-structure per task:
+
+1. Write failing test
+2. Run test, verify failure
+3. Write minimal implementation
+4. Run test, verify pass
+5. Stage for commit
+
+> **Reference**: See `superplan/references/TASK-MICROSTRUCTURE.md` for the full format.
+
+When executing tasks, enforce this order:
+- Test MUST exist before implementation
+- Test MUST fail before writing code
+- Test MUST pass after implementation
 
 ### Sequential Phases
 
