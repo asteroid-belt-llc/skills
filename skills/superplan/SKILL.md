@@ -212,6 +212,39 @@ Break work into phases with poker estimates that can be executed in parallel.
 2. **Testability**: Each phase independently testable
 3. **Estimated Size**: Target 3-8 points per phase
 4. **Quality Gated**: Each phase includes Definition of Done
+5. **Context Managed**: Each phase ends with a CHECKPOINT for compaction
+
+### CHECKPOINT: Context Compaction Between Phases
+
+**EVERY phase MUST end with a CHECKPOINT instruction.** This enables `/superbuild` to run `/compact` automatically in BUILD-ALL mode, preserving context across long implementations.
+
+#### CHECKPOINT Format
+
+```markdown
+- [ ] **CHECKPOINT: Run `/compact focus on: [Phase N] complete, [key artifacts], [Phase N+1] goals`**
+```
+
+#### CHECKPOINT Focus Points
+
+The focus directive tells `/compact` what to preserve:
+- **Completed work**: What was built, key decisions made
+- **Key artifacts**: File paths, API contracts, data models created
+- **Next phase goals**: What the upcoming phase needs to accomplish
+- **Blockers/dependencies**: Any issues that affect future phases
+
+#### Example Phase with CHECKPOINT
+
+```markdown
+## Phase 1: Authentication System
+- [ ] Task 1.1: Create auth models in `src/models/auth.ts`
+- [ ] Task 1.2: Implement JWT handling in `src/services/jwt.ts`
+- [ ] Task 1.3: Add auth middleware in `src/middleware/auth.ts`
+- [ ] **CHECKPOINT: Run `/compact focus on: Phase 1 complete, auth models and JWT service created, Phase 2 needs API endpoints`**
+
+## Phase 2: API Endpoints
+- [ ] Task 2.1: Create `/api/auth/login` endpoint
+...
+```
 
 **Output**: Phase dependency diagram + table with estimates:
 

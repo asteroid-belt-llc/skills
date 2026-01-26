@@ -36,6 +36,7 @@ Superbuild is a **rigid execution engine** for implementation plans. It enforces
 | **Step 5: Updating plan** | [references/PLAN-UPDATES.md](references/PLAN-UPDATES.md) | Checkbox patterns, status updates |
 | **Step 6: Commit message** | [references/COMMIT-FORMAT.md](references/COMMIT-FORMAT.md) | CLI-safe chars, HEREDOC format |
 | **Steps 7-8: Stop/Resume** | [references/EXECUTION-CONTROL.md](references/EXECUTION-CONTROL.md) | Output templates, compaction behavior |
+| **Step 9: AUTO-COMPACT** | [references/EXECUTION-CONTROL.md](references/EXECUTION-CONTROL.md) | CHECKPOINT parsing, auto-compact workflow |
 
 **DO NOT SKIP REFERENCES.** They contain exact templates and patterns that are NOT duplicated here.
 
@@ -66,10 +67,13 @@ Superbuild is a **rigid execution engine** for implementation plans. It enforces
 │  7. FUNCTIONAL TEST│  Explain how to test. Offer integration script │
 │         ↓          │  NEVER auto-create scripts. ALWAYS ask first   │
 │  8. STOP           │  Full stop. Suggest compact. Wait for user.    │
-│                    │  OVERRIDE: --build-all flag continues          │
+│         ↓          │  OVERRIDE: --build-all flag continues          │
+│  9. AUTO-COMPACT   │  BUILD-ALL ONLY: Run /compact at CHECKPOINT    │
+│                    │  Parse focus from CHECKPOINT, compact, continue│
 │                                                                     │
 │  ════════════════════════════════════════════════════════════════   │
 │  Steps 3-8 repeat for EACH PHASE. Plan updates after EVERY phase.  │
+│  BUILD-ALL: Steps 3-9 repeat automatically with auto-compact.       │
 │  ════════════════════════════════════════════════════════════════   │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
@@ -397,6 +401,102 @@ Provide step-by-step manual verification instructions. Offer integration test sc
 
 > **Read [EXECUTION-CONTROL.md](references/EXECUTION-CONTROL.md)** for output templates and compaction behavior.
 
+---
+
+## Step 9: Auto-Compact in BUILD-ALL Mode
+
+**CRITICAL: In BUILD-ALL mode, automatic context compaction is MANDATORY.**
+
+When running with `--build-all` flag, execute `/compact` automatically after each phase CHECKPOINT to preserve context for remaining phases.
+
+### Auto-Compact Trigger
+
+Plans created by `superplan` include CHECKPOINT markers at the end of each phase:
+
+```markdown
+- [ ] **CHECKPOINT: Run `/compact focus on: Phase N complete, [key artifacts], Phase N+1 goals`**
+```
+
+### BUILD-ALL Auto-Compact Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    BUILD-ALL MODE: AUTO-COMPACT                      │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  1. COMPLETE PHASE   │  Execute all tasks, pass quality gates       │
+│          ↓           │                                              │
+│  2. UPDATE PLAN      │  Check off tasks, mark CHECKPOINT done       │
+│          ↓           │                                              │
+│  3. GENERATE COMMIT  │  Output conventional commit message          │
+│          ↓           │                                              │
+│  4. DETECT CHECKPOINT│  Find CHECKPOINT task in completed phase     │
+│          ↓           │                                              │
+│  5. EXTRACT FOCUS    │  Parse focus directive from CHECKPOINT       │
+│          ↓           │                                              │
+│  6. RUN /COMPACT     │  Execute: /compact focus on: [extracted]     │
+│          ↓           │  ⚠️  NO USER INTERVENTION REQUIRED           │
+│  7. CONTINUE         │  Proceed to next phase automatically         │
+│                                                                     │
+│  ════════════════════════════════════════════════════════════════   │
+│  Steps 1-7 repeat for EACH PHASE until plan complete.               │
+│  ════════════════════════════════════════════════════════════════   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### CHECKPOINT Parsing
+
+Extract the focus directive from the CHECKPOINT task:
+
+```
+Input:  - [ ] **CHECKPOINT: Run `/compact focus on: Phase 1 complete, auth models created, Phase 2 needs endpoints`**
+
+Parsed: focus on: Phase 1 complete, auth models created, Phase 2 needs endpoints
+```
+
+### Auto-Compact Execution
+
+**Execute `/compact` with the parsed focus directive:**
+
+```
+AUTO-COMPACT TRIGGERED - Phase [X] Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Running: /compact focus on: [parsed focus directive]
+
+Preserving:
+- Phase [X] completion status
+- Key artifacts: [list from focus]
+- Phase [X+1] goals: [from focus]
+
+[compact executes]
+
+Context refreshed. Continuing to Phase [X+1]...
+```
+
+### No CHECKPOINT Found
+
+If a phase lacks a CHECKPOINT (legacy plan or manual creation):
+
+```
+⚠️  NO CHECKPOINT FOUND - Phase [X]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This phase has no CHECKPOINT marker for auto-compact.
+
+Options:
+1. Continue without compact (risk context exhaustion)
+2. Pause for manual /compact
+3. Add CHECKPOINT to plan and retry
+
+Recommendation: Option 2 for safety
+
+[EXECUTION PAUSED - Awaiting instruction]
+```
+
+> **Read [EXECUTION-CONTROL.md](references/EXECUTION-CONTROL.md)** for detailed auto-compact patterns.
+
 ## Rationalizations to Reject
 
 | Excuse | Reality |
@@ -453,5 +553,6 @@ If you catch yourself thinking any of these, STOP:
 7. **Full stop after phase** - Unless --build-all override
 8. **Suggest compact** - Context management is critical
 9. **Fresh verification required** - Run checks NOW, not from memory
+10. **Auto-compact in BUILD-ALL** - Parse CHECKPOINT, run /compact, continue automatically
 
 **Superbuild is rigid by design.** The enforcement protects code quality. Do not rationalize around it.
