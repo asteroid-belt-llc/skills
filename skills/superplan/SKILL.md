@@ -42,11 +42,32 @@ Superplan creates detailed, executable implementation plans that enable parallel
 
 ---
 
+## Reference Index - MUST READ Before Each Phase
+
+**References are loaded on demand. Read BEFORE starting the relevant phase.**
+
+| When | Reference | What You Get |
+|------|-----------|--------------|
+| **Before ANY parallel operation** | [Sub-Agent Syntax](references/SUBAGENT-SYNTAX.md) | Exact prompts for launching parallel agents |
+| **Phase 3: Interview** | [Interview Guide](references/INTERVIEW-GUIDE.md) | Question templates by feature size |
+| **Phase 5: Explore** | [Explore Prompts](references/EXPLORE-PROMPTS.md) | Exact prompts for codebase exploration agents |
+| **Phase 6: Refactor** | [Refactoring Research](references/REFACTORING-RESEARCH.md) | Mikado, Strangler Fig, Branch by Abstraction |
+| **Phase 7: Architect** | [Architecture Templates](references/ARCHITECTURE-TEMPLATES.md) | API, data model, component tree templates |
+| **Phase 9: Detail** | [Task Micro-Structure](references/TASK-MICROSTRUCTURE.md) | 5-step TDD format for each task |
+| **Phase 10: Test** | [TDD Discipline](references/TDD-DISCIPLINE.md) | TDD rules, rationalizations, red flags |
+| **Phase 10: Test** | [Testing Pyramid](references/TESTING-PYRAMID.md) | Unit/integration/E2E examples |
+| **Phase 10: Test** | [Command Outputs](references/COMMAND-OUTPUTS.md) | Expected test output format |
+| **Phase 11: Document** | [Plan Template](references/PLAN-TEMPLATE.md) | Complete plan file structure |
+
+**DO NOT SKIP REFERENCES.** They contain exact prompts, templates, and formats that are NOT duplicated here.
+
+---
+
 ## CRITICAL: Parallel Execution with Sub-Agents
 
 **YOU MUST USE SUB-AGENTS** for parallelizable operations.
 
-> **MUST READ**: [Sub-Agent Syntax Reference](references/SUBAGENT-SYNTAX.md) for exact prompts and patterns.
+> **STOP. Read [Sub-Agent Syntax](references/SUBAGENT-SYNTAX.md) NOW** before launching any parallel operation.
 
 | Operation | Action |
 |-----------|--------|
@@ -115,7 +136,7 @@ Ask 3-5 questions, then **WAIT FOR ANSWERS**.
 3. "Are there performance/security requirements?"
 4. "What test coverage do you expect?"
 
-> **Reference**: [Interview Guide](references/INTERVIEW-GUIDE.md) for comprehensive question templates.
+> **STOP. Read [Interview Guide](references/INTERVIEW-GUIDE.md) NOW** for question templates before asking.
 
 ---
 
@@ -134,7 +155,7 @@ Otherwise, launch parallel web searches:
 
 ## Phase 5: EXPLORE - Codebase Analysis
 
-> **MUST READ**: [Explore Prompts Reference](references/EXPLORE-PROMPTS.md) for exact agent prompts.
+> **STOP. Read [Explore Prompts](references/EXPLORE-PROMPTS.md) NOW** for exact agent prompts before launching.
 
 Launch 3 parallel Explore agents:
 1. **Pattern Discovery** - Find similar implementations
@@ -149,7 +170,7 @@ Launch 3 parallel Explore agents:
 
 Evaluate if refactoring should precede feature work.
 
-> **MUST READ**: [Refactoring Research](references/REFACTORING-RESEARCH.md) for methodologies and decision frameworks.
+> **STOP. Read [Refactoring Research](references/REFACTORING-RESEARCH.md) NOW** for methodologies before assessing.
 
 ### Confidence Levels
 
@@ -166,7 +187,7 @@ If HIGH or CRITICAL, ask permission to add refactoring phases.
 
 ## Phase 7: ARCHITECT - Solution Design
 
-> **MUST READ**: [Architecture Templates](references/ARCHITECTURE-TEMPLATES.md) for complete templates.
+> **STOP. Read [Architecture Templates](references/ARCHITECTURE-TEMPLATES.md) NOW** for templates before designing.
 
 For each component, answer:
 - [ ] What new components are being added?
@@ -201,7 +222,7 @@ Break work into phases with poker estimates that can be executed in parallel.
 
 ## Phase 9: DETAIL - Code Deltas Per Phase
 
-> **MUST READ**: [Task Micro-Structure](references/TASK-MICROSTRUCTURE.md) for the 5-step TDD format.
+> **STOP. Read [Task Micro-Structure](references/TASK-MICROSTRUCTURE.md) NOW** for 5-step TDD format before detailing tasks.
 
 ### Code Delta Format
 
@@ -214,7 +235,7 @@ Break work into phases with poker estimates that can be executed in parallel.
 
 ## Phase 10: TEST - TDD Acceptance Criteria
 
-> **MUST READ**: [Command Outputs Reference](references/COMMAND-OUTPUTS.md) for expected output format.
+> **STOP. Read [Command Outputs](references/COMMAND-OUTPUTS.md) NOW** for expected output format before writing tests.
 
 ### Testing Pyramid
 
@@ -231,7 +252,7 @@ For each task:
 4. Run test, confirm pass with expected output
 5. All existing tests still pass
 
-> **Reference**: [Testing Pyramid](references/TESTING-PYRAMID.md) for test examples.
+> **Also read [Testing Pyramid](references/TESTING-PYRAMID.md)** for unit/integration/E2E examples.
 
 ---
 
@@ -278,7 +299,7 @@ Files changed:
 
 Write the complete plan to `docs/<feature>-plan.md`.
 
-> **Reference**: [Plan Template](references/PLAN-TEMPLATE.md) for complete structure.
+> **STOP. Read [Plan Template](references/PLAN-TEMPLATE.md) NOW** for complete structure before writing.
 
 ### Execution Handoff
 
@@ -314,29 +335,17 @@ If plan exceeds ~4,000 lines, split into:
 
 ## Quick Reference
 
-| Phase | Key Action | Reference |
-|-------|------------|-----------|
+See **Reference Index** at top of this document for when to read each reference.
+
+| Phase | Key Action | Must Read Before Starting |
+|-------|------------|---------------------------|
 | 1-2 | Gather requirements, detect stack | - |
-| 3 | Interview (3-5 questions, WAIT) | [Interview Guide](references/INTERVIEW-GUIDE.md) |
+| 3 | Interview (WAIT for answers) | Interview Guide |
 | 4 | Research (if needed) | - |
-| 5 | Explore codebase | [Explore Prompts](references/EXPLORE-PROMPTS.md) |
-| 6 | Refactor assessment | [Refactoring Research](references/REFACTORING-RESEARCH.md) |
-| 7 | Architecture design | [Architecture Templates](references/ARCHITECTURE-TEMPLATES.md) |
-| 8-9 | Phase breakdown + code deltas | [Task Micro-Structure](references/TASK-MICROSTRUCTURE.md) |
-| 10 | TDD tests | [Command Outputs](references/COMMAND-OUTPUTS.md), [Testing Pyramid](references/TESTING-PYRAMID.md) |
-| 11 | Write plan + handoff | [Plan Template](references/PLAN-TEMPLATE.md) |
-
----
-
-## References
-
-- [Interview Guide](references/INTERVIEW-GUIDE.md) - Question templates by feature size
-- [Explore Prompts](references/EXPLORE-PROMPTS.md) - Codebase exploration agent prompts
-- [Refactoring Research](references/REFACTORING-RESEARCH.md) - Methodologies (Mikado, Strangler Fig, Branch by Abstraction)
-- [Architecture Templates](references/ARCHITECTURE-TEMPLATES.md) - API, data model, component tree templates
-- [Task Micro-Structure](references/TASK-MICROSTRUCTURE.md) - 5-step TDD cycle per task
-- [Command Outputs](references/COMMAND-OUTPUTS.md) - Expected output format for all commands
-- [Sub-Agent Syntax](references/SUBAGENT-SYNTAX.md) - Exact prompts for parallel execution
-- [Plan Template](references/PLAN-TEMPLATE.md) - Full plan file structure
-- [Testing Pyramid](references/TESTING-PYRAMID.md) - Test examples and strategies
-- [Execution Guide](references/EXECUTION-GUIDE.md) - Step-by-step execution flow
+| 5 | Explore codebase | Explore Prompts |
+| 6 | Refactor assessment | Refactoring Research |
+| 7 | Architecture design | Architecture Templates |
+| 8-9 | Phase breakdown + code deltas | Task Micro-Structure |
+| 10 | TDD tests | TDD Discipline, Testing Pyramid, Command Outputs |
+| 11 | Write plan + handoff | Plan Template |
+| ANY | Parallel operations | Sub-Agent Syntax |

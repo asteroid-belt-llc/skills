@@ -22,6 +22,25 @@ Superbuild is a **rigid execution engine** for implementation plans. It enforces
 
 **This is NOT a planning skill.** Use `superplan` to create plans, then `superbuild` to execute them.
 
+---
+
+## Reference Index - MUST READ When Needed
+
+**References contain detailed templates and patterns. Read BEFORE you need them.**
+
+| When | Reference | What You Get |
+|------|-----------|--------------|
+| **Step 3: Executing tasks** | [superplan/references/TASK-MICROSTRUCTURE.md] | 5-step TDD format per task |
+| **Step 3: Executing tasks** | [superplan/references/TDD-DISCIPLINE.md] | TDD rules, rationalizations, red flags |
+| **Step 4: Any check fails** | [references/ENFORCEMENT-GUIDE.md](references/ENFORCEMENT-GUIDE.md) | Failure templates, output parsing, stack commands |
+| **Step 5: Updating plan** | [references/PLAN-UPDATES.md](references/PLAN-UPDATES.md) | Checkbox patterns, status updates |
+| **Step 6: Commit message** | [references/COMMIT-FORMAT.md](references/COMMIT-FORMAT.md) | CLI-safe chars, HEREDOC format |
+| **Steps 7-8: Stop/Resume** | [references/EXECUTION-CONTROL.md](references/EXECUTION-CONTROL.md) | Output templates, compaction behavior |
+
+**DO NOT SKIP REFERENCES.** They contain exact templates and patterns that are NOT duplicated here.
+
+---
+
 ## Critical Workflow
 
 ```
@@ -34,6 +53,8 @@ Superbuild is a **rigid execution engine** for implementation plans. It enforces
 │         ↓          │  NO PLAN = EXIT (ask user, then exit if none)  │
 │  2. READ PHASES    │  Output ALL phases with estimates              │
 │         ↓          │  IF context high → suggest compact first       │
+│  2.5 PLAN REVIEW   │  Check for ambiguity, missing deps, test gaps  │
+│         ↓          │  IF concerns → PAUSE and ask user              │
 │  3. EXECUTE PHASE  │  One phase at a time (or parallel if marked)   │
 │         ↓          │  USE SUB-AGENTS for parallel phases            │
 │  4. ENFORCE DOD    │  Tests exist? Tests pass? Linter? Formatter?   │
@@ -125,6 +146,32 @@ Large plans consume significant context per phase.
 Ready to execute Phase 0?
 ```
 
+## Step 2.5: Critical Plan Review
+
+Before executing, review the plan for concerns:
+
+1. **Ambiguous tasks** - Any task unclear about what to do?
+2. **Missing dependencies** - Are required files/APIs/packages identified?
+3. **Test gaps** - Does each task have testable acceptance criteria?
+4. **Risky changes** - Any destructive operations or breaking changes?
+
+### If Concerns Exist
+
+```
+⚠️  PLAN REVIEW - Concerns Identified
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. [Concern 1 - what and why]
+2. [Concern 2 - what and why]
+
+Please clarify before I proceed.
+[EXECUTION PAUSED]
+```
+
+### If No Concerns
+
+Proceed to Step 3 (Execute Phase).
+
 ## Step 3: Execute Phase
 
 ### TDD Micro-Structure Enforcement
@@ -132,17 +179,28 @@ Ready to execute Phase 0?
 Plans created by `superplan` use a 5-step TDD micro-structure per task:
 
 1. Write failing test
-2. Run test, verify failure
+2. Run test, verify failure **(MANDATORY - must see it fail)**
 3. Write minimal implementation
-4. Run test, verify pass
+4. Run test, verify pass **(MANDATORY - must see it pass)**
 5. Stage for commit
 
-> **Reference**: See `superplan/references/TASK-MICROSTRUCTURE.md` for the full format.
+> **STOP. Read `superplan/references/TASK-MICROSTRUCTURE.md` and `superplan/references/TDD-DISCIPLINE.md` NOW** before executing any task.
 
-When executing tasks, enforce this order:
-- Test MUST exist before implementation
-- Test MUST fail before writing code
-- Test MUST pass after implementation
+### TDD Enforcement Rules
+
+When executing tasks, enforce this order STRICTLY:
+
+| Rule | Enforcement |
+|------|-------------|
+| Test before code | **STOP** if implementation exists without test |
+| Verify RED | **STOP** if test passes immediately (testing existing behavior) |
+| Minimal code | **STOP** if adding features beyond current test |
+| Verify GREEN | **STOP** if test not run after implementation |
+| No regressions | **STOP** if other tests now fail |
+
+**If test passes immediately:** The test is wrong. It tests existing behavior, not new behavior. Fix the test or you are not doing TDD.
+
+**If you cannot explain why the test failed:** You do not understand what you are testing. Stop and clarify requirements.
 
 ### Sequential Phases
 
@@ -170,9 +228,55 @@ Each sub-agent MUST return:
 
 **CRITICAL:** Each sub-agent returns its commit message. Main agent MUST bubble up ALL commit messages to user.
 
+### Sub-Agent Result Verification
+
+**CRITICAL: Do NOT trust sub-agent claims without independent verification.**
+
+When parallel phases complete:
+1. Collect all sub-agent results
+2. For EACH sub-agent claiming success:
+   - Run `npm test` (or equivalent) to verify tests pass
+   - Run `npm run lint` to verify linter passes
+   - Verify plan file was actually updated
+3. Only after independent verification, output commit messages
+
+Sub-agent reports are CLAIMS, not EVIDENCE. Fresh verification required.
+
 ## Step 4: Enforce Definition of Done
 
 **EVERY phase must pass ALL quality gates before completion.**
+
+### Fresh Verification Requirement
+
+**NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.**
+
+The Verification Gate (run for EVERY check):
+
+1. **IDENTIFY** - Which command proves this claim?
+2. **RUN** - Execute the command NOW (not from memory)
+3. **READ** - Examine FULL output, count failures/errors
+4. **VERIFY** - Does output match the claim?
+5. **THEN CLAIM** - Only state success after steps 1-4
+
+**Invalid Evidence:**
+- Previous run output (even from 2 minutes ago)
+- Assumptions based on code changes
+- Partial verification ("linter passed so types probably pass")
+- Agent/sub-agent reports without independent verification
+
+### Red Flag Language - HALT Immediately
+
+If you find yourself using these words about verification:
+
+| Red Flag | Meaning | Required Action |
+|----------|---------|-----------------|
+| "should pass" | Uncertainty | RUN the check, don't assume |
+| "probably works" | Uncertainty | RUN the check, don't assume |
+| "seems to be fine" | Uncertainty | RUN the check, don't assume |
+| "I believe it passes" | No evidence | RUN the check, get evidence |
+| "based on my changes" | Inference, not verification | RUN the check |
+
+**Any hedging language = missing verification.** Stop and run the actual check.
 
 ### Quality Gate Checklist
 
@@ -215,7 +319,7 @@ Please fix, then tell me to continue.
 [EXECUTION HALTED]
 ```
 
-**See `references/ENFORCEMENT-GUIDE.md`** for detailed failure message templates and output parsing patterns.
+> **STOP. Read [ENFORCEMENT-GUIDE.md](references/ENFORCEMENT-GUIDE.md) NOW** when any check fails - contains failure templates and stack-specific commands.
 
 ## Step 5: Update Plan Document (EVERY PHASE)
 
@@ -241,7 +345,7 @@ Updates applied:
 The plan now reflects Phase [X] completion.
 ```
 
-**See `references/PLAN-UPDATES.md` for detailed patterns and error handling.**
+> **Read [PLAN-UPDATES.md](references/PLAN-UPDATES.md)** for checkbox patterns and error handling.
 
 **WHY EVERY PHASE:**
 - Plan survives context compaction (conversation may not)
@@ -257,31 +361,6 @@ The plan now reflects Phase [X] completion.
 
 **CRITICAL: OUTPUT ONLY. NEVER run git commands.**
 
-```
-PHASE [X] COMPLETE - Conventional Commit Message
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-<type>(<scope>): <short summary>
-
-<body - detailed description of changes>
-
-Files changed:
-- path/to/file1.ts (CREATE)
-- path/to/file2.ts (MODIFY)
-- path/to/file3.ts (DELETE)
-
-<footer - issue refs, breaking changes>
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-⚠️  DO NOT COMMIT - Copy this message and run:
-    git add . && git commit -m "..."
-
-User handles all git operations.
-```
-
-### Commit Types
-
 | Type | When |
 |------|------|
 | `feat` | New feature |
@@ -289,187 +368,34 @@ User handles all git operations.
 | `refactor` | Code restructure (no behavior change) |
 | `test` | Adding/updating tests |
 | `docs` | Documentation |
-| `style` | Formatting (no code change) |
 | `chore` | Build, config, dependencies |
-| `perf` | Performance improvements |
 
-### Git CLI Safe Commit Messages
-
-**CRITICAL: Commit messages must be safe for direct use with `git commit -m`.**
-
-**AVOID:** Double quotes, backticks, dollar signs, exclamation marks, backslashes, hash at line start
-**SAFE:** Letters, numbers, spaces, `-`, `_`, `.`, `,`, `:`, `(`, `)`, `/`, `'`
-
-**See `references/COMMIT-FORMAT.md` for full character table and HEREDOC format for multi-line messages.**
-
-### Parallel Phase Commits
-
-When parallel phases complete, output ALL commit messages:
-
-```
-PARALLEL PHASES COMPLETE (2A, 2B, 2C)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-PHASE 2A - Commit Message:
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-feat(api): implement user authentication endpoints
-...
-
-PHASE 2B - Commit Message:
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-feat(ui): create login form component
-...
-
-PHASE 2C - Commit Message:
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-test(auth): add authentication test coverage
-...
-
-⚠️  Create separate commits for each phase, or squash as appropriate.
-    User handles all git operations.
-```
+> **Read [COMMIT-FORMAT.md](references/COMMIT-FORMAT.md)** for CLI-safe characters and HEREDOC patterns.
+>
+> **Read [EXECUTION-CONTROL.md](references/EXECUTION-CONTROL.md)** for parallel phase commit output format.
 
 ## Step 7: Functional Testing Instructions
 
 **After commit message, explain how to functionally test the phase.**
 
-```
-FUNCTIONAL TESTING - Phase [X]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Provide step-by-step manual verification instructions. Offer integration test script only if applicable - ALWAYS ask, NEVER auto-create.
 
-To manually verify this phase works:
-
-1. [Step 1 - e.g., Start the development server]
-   $ npm run dev
-
-2. [Step 2 - e.g., Navigate to the feature]
-   Open http://localhost:3000/[feature]
-
-3. [Step 3 - e.g., Test the happy path]
-   - Fill in [field1] with "test value"
-   - Click [button]
-   - Verify [expected result]
-
-4. [Step 4 - e.g., Test error handling]
-   - Submit empty form
-   - Verify error message appears
-
-Expected Results:
-- [Result 1]
-- [Result 2]
-```
-
-### Integration Test Script Offer
-
-**ONLY if applicable. ALWAYS ask. NEVER auto-create.**
-
-```
-Would you like me to write an integration test script for this phase?
-
-This would:
-- Automate the manual verification steps above
-- Be saved to scripts/test-phase-[X].sh (or .py)
-- Be runnable for regression testing
-
-Options:
-1. Yes, write the integration test script
-2. No, manual testing is sufficient
-
-[WAIT FOR USER RESPONSE]
-```
-
-**If user says yes:** Write script to `scripts/` directory.
-**If user says no:** Continue to Step 8.
+> **Read [EXECUTION-CONTROL.md](references/EXECUTION-CONTROL.md)** for output format and script offer template.
 
 ## Step 8: Stop Execution
 
 **FULL STOP after each phase (unless --build-all override).**
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PHASE [X] EXECUTION COMPLETE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Output phase completion summary
+2. Show progress table
+3. Suggest context compaction
+4. Wait for explicit "Continue to Phase X" instruction
 
-Summary:
-- Definition of Done: ✅ All checks passed
-- Plan Document: ✅ Updated (tasks and status checked off)
-- Conventional Commit: ✅ Generated (user to commit)
-- Functional Testing: ✅ Instructions provided
+**Post-compaction behavior:** Complete in-progress phase only, then STOP. Todo list is NOT authorization to continue.
 
-Progress:
-| Phase | Status |
-|-------|--------|
-| 0 | ✅ Complete |
-| 1 | ✅ Complete |
-| 2A | ⬜ Next |
-| 2B | ⬜ Pending |
-| 2C | ⬜ Pending |
-| 3 | ⬜ Pending |
+**Build-all override:** Only if user explicitly requests. Warn about risks first.
 
-💡 Context Management Suggestion
-Consider compacting the conversation before the next phase
-to preserve context for the remaining work.
-
-[EXECUTION PAUSED]
-
-To continue: "Continue to Phase 2A"
-To compact first: Use /compact then return with "Resume superbuild"
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Context Compaction Behavior
-
-**CRITICAL: If this session resumes after context compaction:**
-
-1. Complete ONLY the phase that was in-progress
-2. Output the commit message and functional test instructions
-3. STOP - Do not auto-continue to next phase
-4. Wait for explicit user instruction: "Continue to Phase X"
-
-The todo list showing pending phases is NOT authorization to continue.
-Only explicit user instruction authorizes next phase execution.
-
-```
-POST-COMPACTION RESUME
-━━━━━━━━━━━━━━━━━━━━━━
-
-Detected: Session resumed after compaction
-Phase in progress: [X]
-
-Completing Phase [X]...
-[finish work]
-
-PHASE [X] COMPLETE
-[commit message + functional test instructions]
-
-[EXECUTION PAUSED]
-
-Remaining phases: [list]
-To continue: "Continue to Phase [Y]"
-
-⚠️  I will NOT auto-continue. Awaiting your instruction.
-```
-
-### Build-All Override
-
-**ONLY if user explicitly specifies.**
-
-```
-⚠️  BUILD-ALL MODE DETECTED
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-You've requested to build the entire plan without stopping.
-
-This is NOT RECOMMENDED because:
-- Context may be exhausted mid-build
-- Errors compound across phases
-- You lose ability to commit incrementally
-
-Are you sure you want to continue?
-1. Yes, build all phases (override safety)
-2. No, execute phase by phase (recommended)
-```
+> **Read [EXECUTION-CONTROL.md](references/EXECUTION-CONTROL.md)** for output templates and compaction behavior.
 
 ## Rationalizations to Reject
 
@@ -483,6 +409,14 @@ Are you sure you want to continue?
 | "Let me skip to the important part" | **NO.** Execute phases in dependency order. |
 | "I can fix the formatter later" | **NO.** Formatter must pass before completion. |
 | "The user wants to move fast" | **NO.** Quality enforcement is non-negotiable. |
+| "I'm confident this works" | **NO.** Confidence ≠ evidence. Run the check. |
+| "I just ran it a moment ago" | **NO.** Run it again. Fresh evidence required. |
+| "The code is correct, so tests will pass" | **NO.** Run the tests. Code review ≠ testing. |
+| "This is a minor change" | **NO.** All changes require verification. |
+| "Too simple to need a test" | **NO.** Simple code breaks. Write the test. |
+| "I'll add tests after the code works" | **NO.** Tests-after pass immediately. No proof of value. |
+| "I already manually tested it" | **NO.** Ad-hoc testing is not systematic. TDD required. |
+| "The test passed immediately, so it works" | **NO.** Immediate pass = testing existing behavior. Fix test. |
 
 ## Red Flags - STOP Immediately
 
@@ -494,12 +428,19 @@ If you catch yourself thinking any of these, STOP:
 - "Linting is just style, not critical"
 - "I'll generate all commit messages at the end"
 - "The plan doesn't explicitly require tests"
+- "The sub-agent confirmed it passes"
+- "I already verified this earlier"
+- "This is obviously correct"
+- "I wrote the code first, but I'll test it now"
+- "The test passed on the first try"
+- "This feature is too simple for TDD"
+- "Let me just get it working, then add tests"
 
 **All of these = violation of superbuild protocol.**
 
 ## Quality Commands by Stack
 
-**See `references/ENFORCEMENT-GUIDE.md`** for stack-specific commands (JS/TS, Python, Go, Rust).
+> **Read [ENFORCEMENT-GUIDE.md](references/ENFORCEMENT-GUIDE.md)** for stack-specific commands (JS/TS, Python, Go, Rust).
 
 ## Summary: The Iron Rules
 
@@ -511,5 +452,6 @@ If you catch yourself thinking any of these, STOP:
 6. **Explain functional testing** - Ask before writing scripts
 7. **Full stop after phase** - Unless --build-all override
 8. **Suggest compact** - Context management is critical
+9. **Fresh verification required** - Run checks NOW, not from memory
 
 **Superbuild is rigid by design.** The enforcement protects code quality. Do not rationalize around it.

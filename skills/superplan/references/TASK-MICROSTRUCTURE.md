@@ -1,6 +1,8 @@
 # Task Micro-Structure (TDD Cycle)
 
 > **MANDATORY**: Every task within a phase MUST follow this 5-step structure.
+>
+> **See also**: [TDD Discipline Guide](TDD-DISCIPLINE.md) for comprehensive TDD rules, rationalizations to reject, and red flags.
 
 ## Step Format Template
 
@@ -19,18 +21,20 @@ For each task in your plan, use this exact format:
 // Full test code here - no pseudocode
 \`\`\`
 
-**Step 2: Run test to verify it fails**
+**Step 2: Run test to verify it fails (MANDATORY)**
 - Command: `[exact test command]`
 - Expected: FAIL - `[expected error message]`
+- **If test passes immediately**: You are testing existing behavior. Fix your test.
 
 **Step 3: Write minimal implementation**
 \`\`\`[language]
 // Full implementation code here - no pseudocode
 \`\`\`
 
-**Step 4: Run test to verify it passes**
+**Step 4: Run test to verify it passes (MANDATORY)**
 - Command: `[exact test command]`
 - Expected: PASS - `[expected success output]`
+- **Also verify**: All other tests still pass. No new warnings.
 
 **Step 5: Stage for commit**
 \`\`\`bash

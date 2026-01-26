@@ -38,6 +38,30 @@ For each phase, run these checks in order:
 
 ---
 
+## Evidence Requirements by Claim
+
+| Claim | Required Evidence | NOT Sufficient |
+|-------|-------------------|----------------|
+| "Tests pass" | Test output showing 0 failures | Previous run, code review |
+| "Linter clean" | Linter output showing 0 errors | Previous run, "I fixed the errors" |
+| "Build succeeds" | Build command exit code 0 | "Code compiles" without running build |
+| "Types valid" | Type checker output, 0 errors | "I added types" without checking |
+| "Bug fixed" | Failing test now passes | Code change without test verification |
+| "No regressions" | Full test suite passes | "I only changed X, Y is unaffected" |
+
+### Verification Failure Patterns
+
+These patterns indicate skipped verification:
+
+| Pattern | What's Missing |
+|---------|----------------|
+| Claiming success immediately after code change | Didn't run verification commands |
+| "The linter should pass now" | Didn't run linter |
+| Generating commit message without test output | Skipped test verification |
+| "I fixed the type errors" | Didn't run type checker |
+
+---
+
 ## Stack Detection
 
 ### Detection Rules
