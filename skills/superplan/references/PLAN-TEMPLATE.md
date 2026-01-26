@@ -9,10 +9,19 @@ Copy and adapt this template when creating new implementation plans.
 ```markdown
 # [Feature Name] Implementation Plan
 
+> **For Claude:** Execute this plan using `/superbuild` skill.
+> Each phase includes Definition of Done criteria that must pass before proceeding.
+
 > Generated: [DATE]
 > Status: Draft | In Review | Approved | In Progress | Complete
 > Author: [Agent/Human name]
 > Last Updated: [DATE]
+
+**Goal:** [One sentence describing what this builds]
+
+**Architecture:** [2-3 sentences about approach]
+
+**Tech Stack:** [Key technologies/libraries]
 
 ---
 

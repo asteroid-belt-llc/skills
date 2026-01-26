@@ -418,3 +418,97 @@ When considering refactoring, probe the user with:
 - [Branch by Abstraction - Martin Fowler](https://martinfowler.com/bliki/BranchByAbstraction.html)
 - [Parallel Change - Martin Fowler](https://martinfowler.com/bliki/ParallelChange.html)
 - [Refactor vs Rewrite - Test Double](https://testdouble.com/insights/understanding-legacy-application-rewrite-vs-refactor-tradeoffs)
+
+---
+
+## Plan Format Templates
+
+When adding refactoring phases to a superplan, use these templates:
+
+### Mikado Method Plan Format
+
+```markdown
+## Phase 0A: Refactoring - [Goal Name] (Mikado Method)
+
+### Mikado Graph
+\`\`\`
+Target: Replace AuthService with NewAuthService
+├── Dependency: Update UserController (blocked)
+│   ├── Dependency: Add IAuthProvider interface ✓
+│   └── Dependency: Update controller tests ✓
+└── Dependency: Update middleware (blocked)
+    └── Dependency: Add IAuthProvider interface ✓ (shared)
+\`\`\`
+
+### Tasks (work from leaves up)
+1. [ ] Create IAuthProvider interface
+2. [ ] Update UserController to use interface
+3. [ ] Update controller tests
+4. [ ] Update middleware to use interface
+5. [ ] Replace AuthService implementation
+```
+
+### Strangler Fig Plan Format
+
+```markdown
+## Phase 0A-0E: Migration - [System Name] (Strangler Fig)
+
+### Migration Phases
+| Phase | Traffic Split | Description |
+|-------|--------------|-------------|
+| 0A | 0% new | Build new impl + routing layer |
+| 0B | 10% new | Canary release, monitor errors |
+| 0C | 50% new | Gradual rollout |
+| 0D | 100% new | Full migration |
+| 0E | N/A | Remove old implementation |
+
+### Rollback Plan
+- Feature flag: `use_new_auth_service`
+- Rollback: Set flag to false
+- Data: Both systems write to same DB (no migration needed)
+```
+
+### Branch by Abstraction Plan Format
+
+```markdown
+## Phase 0A-0F: Swap Implementation (Branch by Abstraction)
+
+### Abstraction Strategy
+| Phase | Action | Files Changed |
+|-------|--------|---------------|
+| 0A | Create interface | `src/interfaces/IPaymentProvider.ts` |
+| 0B | Wrap old impl | `src/services/StripeAdapter.ts` |
+| 0C | Update callers | 12 files use new interface |
+| 0D | Create new impl | `src/services/SquareAdapter.ts` |
+| 0E | Switch DI | `src/config/di.ts` |
+| 0F | Delete old | `src/services/StripeAdapter.ts` |
+```
+
+### Standard Refactoring Plan Format
+
+```markdown
+## Phase 0A: Refactoring - [Code Smell] Fix
+
+### Before
+\`\`\`typescript
+// 50-line function with 3 responsibilities
+function processOrder(order: Order) {
+  // validation logic (15 lines)
+  // pricing logic (20 lines)
+  // persistence logic (15 lines)
+}
+\`\`\`
+
+### After
+\`\`\`typescript
+// 3 focused functions
+function processOrder(order: Order) {
+  validateOrder(order);
+  const price = calculatePrice(order);
+  return saveOrder(order, price);
+}
+\`\`\`
+
+### Refactoring Applied
+- Extract Method: `validateOrder`, `calculatePrice`, `saveOrder`
+```
