@@ -662,3 +662,46 @@ Choose based on existing project conventions.
 4. **All green before done** - Phase isn't complete until all tests pass
 5. **No regressions** - Existing tests must still pass
 6. **Document test commands** - Include how to run tests in each phase
+
+---
+
+## Testing Anti-Patterns
+
+### The Five Deadly Anti-Patterns
+
+| Anti-Pattern | Problem | Solution |
+|--------------|---------|----------|
+| **Testing Mock Behavior** | Assertions verify mocks exist, not real functionality | Test real component unmocked, or test behavior enabled by mock |
+| **Test-Only Methods** | Adding methods like `destroy()` solely for test cleanup | Move cleanup to test utilities, keep production focused |
+| **Mocking Without Understanding** | Over-mocking "to be safe" breaks test logic | Run with real implementations first, add minimal mocking |
+| **Incomplete Mocks** | Partial mocks fail silently on omitted fields | Mock complete data structures as they exist in reality |
+| **Integration Tests as Afterthought** | Treating testing as optional follow-up | Follow TDD - write failing test first |
+
+### Warning Signs of Bad Mocking
+
+- Mock setup exceeds test logic length
+- Assertions check for `*-mock` test IDs
+- Methods only exist in test files
+- Tests fail when removing the mock
+- Cannot explain why mocking is needed
+
+### When Mocks Are Appropriate
+
+**Mock external systems, not internal logic:**
+
+```typescript
+// GOOD: Mock external API
+jest.mock('../services/paymentGateway');
+
+// BAD: Mock internal helper
+jest.mock('../utils/calculateTax');
+// Let calculateTax run - it is fast and deterministic
+```
+
+### The Iron Laws of Mocking
+
+1. **Never test mock behavior** - Test what the code does, not what mocks do
+2. **Never add test-only methods to production** - Keep production classes focused
+3. **Never mock without understanding dependencies** - Know what you are isolating and why
+
+> **Reference**: [TDD Discipline Guide](TDD-DISCIPLINE.md) for comprehensive TDD rules

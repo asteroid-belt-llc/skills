@@ -38,6 +38,30 @@ For each phase, run these checks in order:
 
 ---
 
+## Evidence Requirements by Claim
+
+| Claim | Required Evidence | NOT Sufficient |
+|-------|-------------------|----------------|
+| "Tests pass" | Test output showing 0 failures | Previous run, code review |
+| "Linter clean" | Linter output showing 0 errors | Previous run, "I fixed the errors" |
+| "Build succeeds" | Build command exit code 0 | "Code compiles" without running build |
+| "Types valid" | Type checker output, 0 errors | "I added types" without checking |
+| "Bug fixed" | Failing test now passes | Code change without test verification |
+| "No regressions" | Full test suite passes | "I only changed X, Y is unaffected" |
+
+### Verification Failure Patterns
+
+These patterns indicate skipped verification:
+
+| Pattern | What's Missing |
+|---------|----------------|
+| Claiming success immediately after code change | Didn't run verification commands |
+| "The linter should pass now" | Didn't run linter |
+| Generating commit message without test output | Skipped test verification |
+| "I fixed the type errors" | Didn't run type checker |
+
+---
+
 ## Stack Detection
 
 ### Detection Rules
@@ -472,7 +496,12 @@ REQUIREMENTS
 
 1. Execute ONLY Phase [X] - do not touch other phases
 2. Follow the plan's specifications exactly
-3. Write tests FIRST if plan specifies TDD
+3. For each task, follow the 5-step TDD micro-structure:
+   - Step 1: Write failing test
+   - Step 2: Run test, verify it fails
+   - Step 3: Write minimal implementation
+   - Step 4: Run test, verify it passes
+   - Step 5: Stage files for commit
 4. Verify Definition of Done before reporting complete:
    - Tests exist for new code
    - All tests pass
@@ -489,6 +518,7 @@ RETURN FORMAT (JSON)
 {
   "phase": "[X]",
   "status": "complete" | "failed",
+  "tdd_verified": true,
   "dod_checklist": {
     "tests_exist": true,
     "tests_pass": true,
@@ -505,6 +535,17 @@ RETURN FORMAT (JSON)
   "failure_reason": null
 }
 ```
+
+### Sub-Agent Prompt Checklist
+
+Every sub-agent prompt MUST include:
+
+- [ ] Which phase to implement (exact phase ID: "Phase 1A")
+- [ ] Path to plan file (exact path: "docs/feature-plan.md")
+- [ ] Instruction to follow 5-step TDD micro-structure
+- [ ] Instruction to run quality gates
+- [ ] Instruction to update plan document
+- [ ] Instruction to return conventional commit message
 
 ### Result Aggregation
 

@@ -9,10 +9,19 @@ Copy and adapt this template when creating new implementation plans.
 ```markdown
 # [Feature Name] Implementation Plan
 
+> **For Claude:** Execute this plan using `/superbuild` skill.
+> Each phase includes Definition of Done criteria that must pass before proceeding.
+
 > Generated: [DATE]
 > Status: Draft | In Review | Approved | In Progress | Complete
 > Author: [Agent/Human name]
 > Last Updated: [DATE]
+
+**Goal:** [One sentence describing what this builds]
+
+**Architecture:** [2-3 sentences about approach]
+
+**Tech Stack:** [Key technologies/libraries]
 
 ---
 
@@ -483,6 +492,9 @@ ALTER TABLE [table_name]
 - [ ] All tools added to package.json scripts
 - [ ] CI/CD updated to run quality checks (if applicable)
 
+#### Context Checkpoint
+- [ ] **CHECKPOINT: Run `/compact focus on: Phase 0 complete, quality tools configured (linter/formatter/typecheck/test), Phase 1 needs migrations and config`**
+
 ---
 
 ### Phase 1: Setup
@@ -587,6 +599,9 @@ psql $DATABASE_URL -c "\\d [table_name]"
 npm run migrate:rollback
 npm run migrate
 ```
+
+#### Context Checkpoint
+- [ ] **CHECKPOINT: Run `/compact focus on: Phase 1 complete, database schema created ([table_name]), config values added, Phase 2 implements API/UI/tests`**
 
 ---
 
@@ -786,6 +801,9 @@ curl -X POST http://localhost:3000/api/[feature] \
   -d '{}'
 ```
 
+#### Context Checkpoint
+- [ ] **CHECKPOINT: Run `/compact focus on: Phase 2A complete, API endpoints created (POST/GET /api/[feature]), validation and auth working, Phase 3 integrates with frontend`**
+
 ---
 
 ### Phase 2B: [Frontend UI]
@@ -977,6 +995,9 @@ describe('[Feature]Form', () => {
 5. Verify loading state during submission
 6. Verify form resets after success
 
+#### Context Checkpoint
+- [ ] **CHECKPOINT: Run `/compact focus on: Phase 2B complete, UI components created ([Feature]Page, [Feature]Form), form validation working, Phase 3 wires frontend to backend`**
+
 ---
 
 ### Phase 2C: [Additional Tests / Edge Cases]
@@ -1002,6 +1023,9 @@ describe('[Feature]Form', () => {
 - [ ] Test coverage >= 80% for new code
 - [ ] All existing tests still pass
 - [ ] No new warnings introduced
+
+#### Context Checkpoint
+- [ ] **CHECKPOINT: Run `/compact focus on: Phase 2C complete, edge case tests and fixtures created, test coverage solid, Phase 3 integrates all components`**
 
 ---
 
@@ -1091,6 +1115,9 @@ Complete user journey test:
 8. Delete [item]
 9. Verify [item] removed
 10. Logout
+
+#### Context Checkpoint (Final)
+- [ ] **CHECKPOINT: Run `/compact focus on: [Feature] implementation COMPLETE, all phases done, E2E tests passing, ready for review/merge`**
 
 ---
 
