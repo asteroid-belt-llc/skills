@@ -1,4 +1,9 @@
 # MacOS
 .DS_Store
+
+# AI
 .claude/settings.local.json
 
+# Generated
+docs/
+plans/
